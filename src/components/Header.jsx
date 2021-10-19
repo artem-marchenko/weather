@@ -7,7 +7,7 @@ const Header = () => {
         <span className='brand-logo logo left'>Weather</span>
         <ul id='nav-mobile' className='right'>
           <li>
-            <Link to='/'>Home</Link>
+            <Link to='/weather/'>Home</Link>
           </li>
         </ul>
       </div>

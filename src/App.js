@@ -17,7 +17,7 @@ const App = () => {
         <Header />
         <main className='container content'>
           <Switch>
-            <Route exact path='/weather' component={Home} />
+            <Route exact path='/weather/' component={Home} />
             <Route component={NotFound} />
           </Switch>
         </main>

@@ -1,0 +1,125 @@
+import { useState, useEffect } from 'react';
+import { weatherApi } from '../api';
+import { Main } from '../components/Main';
+import Loader from '../components/Loader';
+import { Searching } from '../components/Searching';
+import WeeksForecastContainer from '../components/WeeksForecastContainer';
+
+const Home = () => {
+  const [isLoader, setIsLoader] = useState(true);
+  const [currentGeo, setCurrentGeo] = useState({});
+  const [isSearching, setIsSearching] = useState(false);
+  const [weekForecast, setWeekForecast] = useState({
+    isOpen: false,
+    city: null,
+  });
+  const [locations, setLocations] = useState([]);
+
+  useEffect(() => {
+    navigator.geolocation.getCurrentPosition((data) => {
+      weatherApi
+        .byCoord(data.coords.latitude, data.coords.longitude)
+        .then(
+          (res) => {
+            let { temp, feels_like } = res.data.main;
+            let { name } = res.data;
+            let { description, main: icon } = res.data.weather[0];
+            setCurrentGeo({
+              temp,
+              feels_like,
+              name,
+              description,
+              icon,
+            });
+            setIsLoader(false);
+          },
+          () => {
+            alert('Ошибка! Вы не дали доступа к гео-позиции!');
+          }
+        );
+    });
+  }, []);
+
+  useEffect(() => {
+    let elements =
+      JSON.parse(localStorage.getItem('locations')) || [];
+    elements.forEach((elem) => getWeatherByName(elem));
+    // eslint-disable-next-line
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem(
+      'locations',
+      JSON.stringify(locations.map((elem) => elem.name))
+    );
+  }, [locations]);
+
+  const getWeatherByName = (cityName) => {
+    if (!locations.some((loc) => loc.name === cityName)) {
+      setIsLoader(true);
+      weatherApi
+        .byCityName(cityName)
+        .then((res) => {
+          let { temp, feels_like } = res.data.main;
+          let { description, main: icon } = res.data.weather[0];
+
+          setLocations((prevLocations) => [
+            {
+              temp,
+              feels_like,
+              name: cityName,
+              description,
+              icon,
+              id: 1,
+            },
+            ...prevLocations,
+          ]);
+          setIsLoader(false);
+        })
+        .catch((err) => {
+          alert(`Город ${cityName} не найден :(`);
+        });
+    } else alert(`Вы уже добавили город ${cityName}`);
+  };
+
+  const deleteCity = (cityName) => {
+    setLocations((prevLocations) =>
+      prevLocations.filter((loc) => loc.name !== cityName)
+    );
+  };
+
+  return (
+    <>
+      <>
+        {isLoader ? (
+          <Loader />
+        ) : (
+          <Main
+            currentGeo={currentGeo}
+            setIsSearching={setIsSearching}
+            isSearching={isSearching}
+            locations={locations}
+            deleteCity={deleteCity}
+            setWeekForecast={setWeekForecast}
+            isFixed={weekForecast.isOpen}
+          />
+        )}
+        {isSearching && (
+          <Searching
+            setIsSearching={setIsSearching}
+            getWeatherByName={getWeatherByName}
+          />
+        )}
+
+        {weekForecast.isOpen && (
+          <WeeksForecastContainer
+            city={weekForecast.city}
+            isOpen={weekForecast.isOpen}
+          />
+        )}
+      </>
+    </>
+  );
+};
+
+export { Home };

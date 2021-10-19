@@ -13,7 +13,7 @@ export const weatherApi = {
   },
   byCityName(city) {
     return instance.get(
-      `weather?q=${city}&units=metric&lang=${API_KEY}`
+      `weather?q=${city}&units=metric&lang=ru&appid=${API_KEY}`
     );
   },
   forWeek(city) {

@@ -13,11 +13,11 @@ import { NotFound } from './pages/NotFound';
 const App = () => {
   return (
     <>
-      <Router>
+      <Router basename='/weather'>
         <Header />
         <main className='container content'>
           <Switch>
-            <Route exact path='/weather/' component={Home} />
+            <Route exact path='/' component={Home} />
             <Route component={NotFound} />
           </Switch>
         </main>
